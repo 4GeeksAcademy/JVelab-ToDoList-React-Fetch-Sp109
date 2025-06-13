@@ -19,6 +19,7 @@ const ToDoList = () => {
     function addTask(event) {
         if (event.key === 'Enter') {
             setTaskList([...taskList, taskInput])
+            setTaskInput("")
         }
     }
 
