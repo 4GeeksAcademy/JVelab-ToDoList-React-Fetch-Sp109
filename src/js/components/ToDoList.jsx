@@ -6,12 +6,22 @@ const ToDoList = () => {
     const [taskList, setTaskList] = useState([])
     const USERNAME = "jose"
 
-    useEffect( () => {
-        fetch(`https://playground.4geeks.com/todo/users/${USERNAME}`)
-        .then(res => res.json())
-        .then(data => setTaskList(data.todos))
-        .catch(err => console.error(err))
-    }, [])
+    useEffect( () => getElementFromApi(), [])
+
+    function getElementFromApi() {
+        fetch(`https://playground.4geeks.com/todo/users/${USERNAME}`,)
+        .then(res => {
+            if (!res.ok) {
+                return fetch(`https://playground.4geeks.com/todo/users/${USERNAME}`, {
+                    method: "POST"
+                })
+            }
+            else {
+                return res.json()
+                .then(data => setTaskList(data.todos))
+            }
+        })
+    }
 
     function deleteItem(indexToDelete) {
         const taskToDelete = taskList[indexToDelete]
@@ -19,8 +29,7 @@ const ToDoList = () => {
         fetch(`https://playground.4geeks.com/todo/todos/${taskToDelete.id}`, {
             method: "DELETE"
         })
-        const updatedTasks = taskList.filter((_, index) => index !== indexToDelete);
-        setTaskList(updatedTasks);
+        .then( () => getElementFromApi())
     }
 
     function deleteAllTask() {
@@ -30,8 +39,9 @@ const ToDoList = () => {
             fetch(`https://playground.4geeks.com/todo/todos/${taskToDelete.id}`, {
                 method: "DELETE"
             })
+            .then( () => getElementFromApi())
         }
-        setTaskList([])
+        
     }
 
      const listItems = taskList.map((task, index) =>
@@ -42,18 +52,14 @@ const ToDoList = () => {
 
     function addTask(event) {
         if (event.key === "Enter" && taskInput.trim() !== "") {
-            setTaskList([...taskList, { "label": taskInput.trim(), "done": false }])
             fetch(`https://playground.4geeks.com/todo/todos/${USERNAME}`, {
                 method: "POST",
                 body: JSON.stringify({ "label": taskInput.trim(), "done": false }),
                 headers: { "Content-Type": "application/json" },
             })
-            .then(res => {res.json()
-                console.log(res)
-            })
-            .then(data => console.log("Lista guardada:", data))
-            .catch(err => console.error("Error al guardar tareas:", err))
+            .then( () => getElementFromApi())
             setTaskInput("")
+            
         }
     }
 
